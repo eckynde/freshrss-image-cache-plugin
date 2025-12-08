@@ -134,6 +134,15 @@ final class ImageCacheExtension extends Minz_Extension
         return $content;
     }
 
+    public static function cache_thumbnail(array $thumbnail): array
+    {
+	    if (empty($thumbnail['url'])) {
+            return $thumbnail;
+        }
+        self::send_proactive_cache_request($thumbnail['url']);
+
+        return $thumbnail;
+    }
 
     public static function getSrcSetUris(array $matches): string {
         return str_replace($matches[1], self::getCacheImageUri($matches[1]), $matches[0]);
@@ -173,10 +182,24 @@ final class ImageCacheExtension extends Minz_Extension
         return $doc->saveHTML();
     }
 
+	public static function swapThumbnail(array $thumbnail): array
+    {
+	    if (empty($thumbnail['url'])) {
+            return $thumbnail;
+        }
+        
+        $thumbnail['url'] = self::getCacheImageUri($thumbnail['url']);
+        return $thumbnail;
+    }
+
     public static function content_modification_hook($entry)
     {
         $entry->_content(
             self::swapUris($entry->content())
+        );
+	    $entry->_attribute(
+            'thumbnail',
+            self::swapThumbnail($entry->attributeArray('thumbnail') ?? [])
         );
 
         return $entry;
@@ -185,6 +208,7 @@ final class ImageCacheExtension extends Minz_Extension
     public static function image_upload_hook($entry)
     {
         self::cache_images($entry->content());
+        self::cache_thumbnail($entry->attributeArray('thumbnail') ?? []);
         return $entry;
     }
 }
