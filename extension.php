@@ -199,7 +199,7 @@ final class ImageCacheExtension extends Minz_Extension
         );
 	    $entry->_attribute(
             'thumbnail',
-            self::swapThumbnail($entry->attributeArray('thumbnail') ?? [])
+            self::swapThumbnail($entry->thumbnail() ?? [])
         );
 
         return $entry;
